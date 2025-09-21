@@ -1,6 +1,9 @@
+from django.conf import settings
+
 class UserNotificationManager:
     def __init__(self, id):
         self.user_id = id
+        self.notification_limit = getattr(settings, 'NOTIFICATION_PAGE_SIZE', 10)
 
     @staticmethod
     def get_notification_models():
@@ -18,7 +21,8 @@ class UserNotificationManager:
     def get_notifications(self):
         data = {}
         for model in self.get_notification_models().values():
-            data[model.name()] = model.objects.filter(user_id=self.user_id)
+            queryset = model.objects.filter(user_id=self.user_id)[:self.notification_limit]
+            data[model.name()] = queryset
         return data
 
     def get_serialized_notifications(self):
