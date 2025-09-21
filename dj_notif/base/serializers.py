@@ -1,11 +1,9 @@
 from rest_framework import serializers
 
 
-
-class BaseNotificationSerializer(serializers.ModelSerializer):
+class BaseSerializer(serializers.ModelSerializer):
     created_at = serializers.SerializerMethodField()
     modified_at = serializers.SerializerMethodField()
-    user = serializers.IntegerField(source='user_id')
 
     def __init__(self, *args, **kwargs):
         fields = kwargs.pop('fields', None)
@@ -13,6 +11,7 @@ class BaseNotificationSerializer(serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
 
         if fields is not None:
+            # Drop any fields that are not specified in the `fields` argument
             allowed = set(fields)
             existing = set(self.fields.keys())
             for field_name in existing - allowed:
@@ -26,7 +25,7 @@ class BaseNotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = None  # You need to set this in the derived serializers
-        fields = ['title', 'description', 'level', 'user', 'created_at', 'read_at']
+        fields = '__all__'
 
     @staticmethod
     def get_created_at(obj):
@@ -41,9 +40,3 @@ class BaseNotificationSerializer(serializers.ModelSerializer):
             return obj.modified_at.strftime("%Y-%m-%d %H:%M:%S")
         except Exception as err:
             return str(err)
-
-
-
-
-
-
